@@ -99,6 +99,26 @@ class MovieControllerTest extends ErrorDetailInfoList {
                 .andDo(MockMvcResultHandlers.print())
                 .andReturn();
     }
+    
+    @Test
+    void getMovieByIdWithBadRequestByServiceValidation() throws Exception {
+        // Mock the movie manager to return success for movie deletion
+        ManagerViewModel<List<MovieViewModel>> managerViewModel = new ManagerViewModel<>();
+        managerViewModel.setContent(null);  // Movie deletion usually returns null content
+		managerViewModel.setInfo(getInfoBadRequest("Movie By Id 5 is not found"));
+		managerViewModel.setTotalRows(1);
+
+        Mockito.when(movieManager.getMovieById(Mockito.anyLong(), Mockito.eq(5)))
+        		.thenReturn(managerViewModel);
+
+        // Perform DELETE request to delete a movie and print response
+        mockMvc.perform(MockMvcRequestBuilders.get("/movies/5")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultHandlers.print())
+                .andReturn();
+    }
 
     @Test
     void createMovie() throws Exception {
@@ -133,6 +153,29 @@ class MovieControllerTest extends ErrorDetailInfoList {
     }
 
     @Test
+    void createMovieWithBadRequestByMethodArgumentNotValidException() throws Exception {
+        // Mock movie data with null title and rating below 0.0
+        MovieViewModel movie = MovieViewModel.builder()
+                .id(1)
+                .title(null)  // Title is null (bad request)
+                .description(null) // Description is null (bad request)
+                .rating(2.0f)
+                .image("path/to/image.jpg")
+                .createdAt("2023-09-30 12:00:00")
+                .updatedAt("2023-09-30 14:30:00")
+                .build();
+
+        // Perform POST request to create a movie with bad request payload
+        mockMvc.perform(MockMvcRequestBuilders.post("/movies/")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(movie)))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest())  // Expecting a bad request
+                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultHandlers.print())
+                .andReturn();
+    }
+    
+    @Test
     void updateMovie() throws Exception {
         // Mock movie data to be updated
         MovieViewModel movie = MovieViewModel.builder()
@@ -163,7 +206,62 @@ class MovieControllerTest extends ErrorDetailInfoList {
                 .andDo(MockMvcResultHandlers.print())
                 .andReturn();
     }
+    
+    @Test
+    void updateMovieWithBadRequestByMethodArgumentNotValidException() throws Exception {
+        // Mock movie data with null title and rating below 0.0
+        MovieViewModel movie = MovieViewModel.builder()
+                .id(1)
+                .title(null)  // Title is null (bad request)
+                .description(null) // Description is null (bad request)
+                .rating(2.0f)
+                .image("path/to/image.jpg")
+                .createdAt("2023-09-30 12:00:00")
+                .updatedAt("2023-09-30 14:30:00")
+                .build();
 
+        // Perform PATCH request to update a movie with bad request payload
+        mockMvc.perform(MockMvcRequestBuilders.patch("/movies/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(movie)))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest())  // Expecting a bad request
+                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultHandlers.print())
+                .andReturn();
+    }
+    
+    @Test
+    void updateMovieWithBadRequestByServiceValidation() throws Exception {
+        // Mock movie data to be updated
+        MovieViewModel movie = MovieViewModel.builder()
+                .id(5)
+                .title("Updated Movie")
+                .description("This is a mock movie description.")
+                .rating(8.5f)
+                .image("path/to/image.jpg")
+                .createdAt("2023-09-30 12:00:00")
+                .updatedAt("2023-09-30 14:30:00")
+                .build();
+
+        // Mock the movie manager to return the updated movie
+        ManagerViewModel<MovieViewModel> managerViewModel = new ManagerViewModel<>();
+        managerViewModel.setContent(null);
+		managerViewModel.setInfo(getInfoBadRequest("Movie By Id "+movie.getId()+" is not found"));
+		managerViewModel.setTotalRows(1);
+
+        Mockito.when(movieManager.updateMovieById(Mockito.anyLong(), Mockito.eq(5), Mockito.any()))
+                .thenReturn(managerViewModel);
+
+        // Perform PATCH request to update a movie and print response
+        mockMvc.perform(MockMvcRequestBuilders.patch("/movies/5")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(movie)))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultHandlers.print())
+                .andReturn();
+    }
+    
     @Test
     void deleteMovieById() throws Exception {
         // Mock the movie manager to return success for movie deletion
@@ -183,4 +281,25 @@ class MovieControllerTest extends ErrorDetailInfoList {
                 .andDo(MockMvcResultHandlers.print())
                 .andReturn();
     }
+    
+    @Test
+    void deleteMovieByIdWithBadRequestByServiceValidation() throws Exception {
+        // Mock the movie manager to return success for movie deletion
+        ManagerViewModel<MovieViewModel> managerViewModel = new ManagerViewModel<>();
+        managerViewModel.setContent(null);  // Movie deletion usually returns null content
+		managerViewModel.setInfo(getInfoBadRequest("Movie By Id 5 is not found"));
+		managerViewModel.setTotalRows(1);
+
+        Mockito.when(movieManager.deleteMovieById(Mockito.anyLong(), Mockito.eq(5)))
+                .thenReturn(managerViewModel);
+
+        // Perform DELETE request to delete a movie and print response
+        mockMvc.perform(MockMvcRequestBuilders.delete("/movies/5")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultHandlers.print())
+                .andReturn();
+    }
+    
 }

@@ -102,7 +102,13 @@ View the responses to each API call within the Swagger UI to understand the stru
 
 Understand the required request payloads and parameters for each API endpoint by examining the "Request Body" and "Parameters" sections in Swagger UI.
 
-Explore the API documentation to learn more about the available movie-related operations and how to interact with them.
+6. Run JUnit Tests:
+
+- Open the provided `MovieControllerTest` class in your IDE.
+- Run each JUnit test method to verify the functionality of the `MovieController` endpoints.
+- The tests will simulate HTTP requests to the API endpoints and validate the responses.
+
+Explore the API documentation and run the provided JUnit tests to ensure the functionality and correctness of the `MovieController` endpoints.
 
 For additional details on each endpoint's functionality and usage, refer to the Swagger documentation provided in the Swagger UI.
 
